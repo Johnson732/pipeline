@@ -50,14 +50,14 @@ steps:
     arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage"'
     publishTestResults: true
 
-# Generate OpenCover-compatible report for SonarCloud
-- task: reportgenerator@5
-  displayName: 'Convert coverage to OpenCover format'
-  inputs:
-    reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
-    targetdir: '$(Build.ArtifactStagingDirectory)/coverage-report'
-    reporttypes: 'Cobertura'
-    sourcedirs: 'CalculatorLib'
+# # Generate OpenCover-compatible report for SonarCloud
+# - task: reportgenerator@5
+#   displayName: 'Convert coverage to OpenCover format'
+#   inputs:
+#     reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+#     targetdir: '$(Build.ArtifactStagingDirectory)/coverage-report'
+#     reporttypes: 'Cobertura'
+#     sourcedirs: 'CalculatorLib'
 
 # 🔵 SonarCloud Analyze (perform scan)
 - task: SonarCloudAnalyze@1
