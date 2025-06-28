@@ -1,0 +1,94 @@
+##############################
+# .NET Core / .NET 6+ / .NET 8
+##############################
+.vs/
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ASP.NET secrets
+secrets.json
+
+# Rider
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/
+.history/
+
+# Publish directory
+publish/
+
+##############################
+# Node / React (if frontend)
+##############################
+
+# Dependencies
+node_modules/
+
+# Build output
+build/
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+##############################
+# OS-specific
+##############################
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+##############################
+# Git
+##############################
+
+# Ignore Git history backup
+*.orig
+
+# Ignore merge conflict files
+*.rej
+*.conflict*
+
+##############################
+# Others (optional)
+##############################
+
+# Package Lock / Yarn
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
