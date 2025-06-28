@@ -8,18 +8,32 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+# Install .NET 8 SDK
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '8.0.x'  # Change if using .NET 6 or 7
+    version: '8.0.x'
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
+# 🟡 SonarCloud Prepare (start scan)
+- task: SonarCloudPrepare@1
+  inputs:
+    SonarCloud: 'SonarCloud Service Connection'  # 🔑 Make sure this matches your service connection name
+    organization: 'testac175'          # 🌐 From your SonarCloud URL
+    scannerMode: 'MSBuild'
+    projectKey: 'testac175_pipeline'               # 🔑 Exact project key from SonarCloud
+    projectName: 'Calculator'
+    extraProperties: |
+      sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/**/coverage.opencover.xml
+
+# Restore NuGet packages
 - task: DotNetCoreCLI@2
   displayName: 'Restore NuGet packages'
   inputs:
     command: 'restore'
     projects: '**/*.csproj'
 
+# Build the solution
 - task: DotNetCoreCLI@2
   displayName: 'Build the solution'
   inputs:
@@ -27,13 +41,33 @@ steps:
     projects: 'Calculator.sln'
     arguments: '--configuration $(buildConfiguration)'
 
+# Run unit tests with code coverage enabled
 - task: DotNetCoreCLI@2
-  displayName: 'Run unit tests'
+  displayName: 'Run unit tests with coverage'
   inputs:
     command: 'test'
     projects: 'CalculatorLib.Tests/CalculatorLib.Tests.csproj'
-    arguments: '--configuration $(buildConfiguration) --no-build --verbosity normal'
+    arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage"'
+    publishTestResults: true
 
+# Generate OpenCover-compatible report for SonarCloud
+- task: reportgenerator@5
+  displayName: 'Convert coverage to OpenCover format'
+  inputs:
+    reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+    targetdir: '$(Build.ArtifactStagingDirectory)/coverage-report'
+    reporttypes: 'Cobertura'
+    sourcedirs: 'CalculatorLib'
+
+# 🔵 SonarCloud Analyze (perform scan)
+- task: SonarCloudAnalyze@1
+
+# 🟢 SonarCloud Publish (upload results)
+- task: SonarCloudPublish@1
+  inputs:
+    pollingTimeoutSec: '300'
+
+# (Optional) Publish Build Artifacts
 # - task: PublishBuildArtifacts@1
 #   displayName: 'Publish build output'
 #   inputs:
