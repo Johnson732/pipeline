@@ -1,0 +1,101 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+stages:
+  - stage: Dev
+    displayName: 'Stage 1 (Dev CI)'
+    jobs:
+      - job: restorejob
+        displayName: 'Job 1 (Restore Dependencies)'
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Task 1 (Install .NET SDK)'
+            inputs:
+              packageType: 'sdk'
+              version: '8.0.x'
+              installationPath: $(Agent.ToolsDirectory)/dotnet
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Task 2 (Real Restore NuGet Packages)'
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+      - job: buildjob
+        displayName: 'Job 2 (Build Application)'
+        dependsOn: restorejob
+        steps:
+          - script: echo "dotnet build --configuration $(buildConfiguration)"
+            displayName: 'Task 3 (Compile the Application)'
+
+      - job: unittestjob
+        displayName: 'Job 3 (Run Unit Tests)'
+        dependsOn: buildjob
+        steps:
+          - script: echo "dotnet test --collect:\"XPlat Code Coverage\""
+            displayName: 'Task 4 (Run Unit Tests with Code Coverage)'
+
+      - job: publishjob
+        displayName: 'Job 4 (Publish Artifacts)'
+        dependsOn: unittestjob
+        steps:
+          - script: echo "Publishing build output to drop artifact..."
+            displayName: 'Task 5 (Publish Build Output)'
+
+  - stage: QA
+    displayName: 'Stage 2 (QA Testing)'
+    dependsOn: Dev
+    jobs:
+      - deployment: DeployQA
+        displayName: 'Job 5 (QA Integration Tests)'
+        environment: 'qa'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Running API Integration Tests..."
+                  displayName: 'Task 6 (Execute Integration Test Scripts)'
+                - script: echo "Generating QA Test Report..."
+                  displayName: 'Task 7 (Generate QA Report)'
+
+  - stage: UAT
+    displayName: 'Stage 3 (UAT Approval & Smoke Testing)'
+    dependsOn: QA
+    jobs:
+      - deployment: DeployUAT
+        displayName: 'Job 6 (UAT Smoke Testing)'
+        environment: 'uat'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Deploying to UAT environment..."
+                  displayName: 'Task 8 (Simulated UAT Deployment)'
+                - script: echo "Running UAT Smoke Tests..."
+                  displayName: 'Task 9 (Smoke Test Critical Features)'
+                - script: echo "Waiting for UAT Stakeholder Approval..."
+                  displayName: 'Task 10 (Notify Stakeholders for Approval)'
+
+  - stage: Prod
+    displayName: 'Stage 4 (Production Release)'
+    dependsOn: UAT
+    jobs:
+      - deployment: DeployProd
+        displayName: 'Job 7 (Production Deployment)'
+        environment: 'prod'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Deploying to Production Servers..."
+                  displayName: 'Task 11 (Production Deployment Script)'
+                - script: echo "Tagging Release in Source Control..."
+                  displayName: 'Task 12 (Tag Release Version)'
+                - script: echo "Sending Slack/Email Notification to Team"
+                  displayName: 'Task 13 (Notify Post-Release Success)'
