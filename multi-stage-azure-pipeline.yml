@@ -99,3 +99,31 @@ stages:
                   displayName: 'Task 12 (Tag Release Version)'
                 - script: echo "Sending Slack/Email Notification to Team"
                   displayName: 'Task 13 (Notify Post-Release Success)'
+
+
+
+# Pipeline
+# ├── Stage: Dev (CI)
+# │   ├── Job 1: Restore Dependencies
+# │   │   ├── Task: Install .NET SDK
+# │   │   └── Task: dotnet restore
+# │   ├── Job 2: Build Application
+# │   │   └── Task: Compile the Application
+# │   ├── Job 3: Run Unit Tests
+# │   │   └── Task: Unit Tests with Code Coverage
+# │   └── Job 4: Publish Artifacts
+# │       └── Task: Publish Build Output
+# ├── Stage: QA (CD)
+# │   └── Job 5: Integration Testing
+# │       ├── Task: Execute Test Scripts
+# │       └── Task: Generate QA Report
+# ├── Stage: UAT (CD)
+# │   └── Job 6: UAT Smoke Testing
+# │       ├── Task: Simulated Deployment
+# │       ├── Task: Smoke Tests
+# │       └── Task: Notify Stakeholders
+# └── Stage: Prod (CD)
+#     └── Job 7: Production Deployment
+#         ├── Task: Deploy to Prod Servers
+#         ├── Task: Tag Release
+#         └── Task: Send Release Notification
